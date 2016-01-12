@@ -20,5 +20,5 @@
       (:id (first (filter #(= list-name (:name %)) lists))))))
 
 (defn all-names-for-list [list-name]
-  (mapcat #(names-for-list (list-id-for-board-and-list % list-name))
-          (-> settings :trello :boards)))
+  (apply concat (pmap #(names-for-list (list-id-for-board-and-list % list-name))
+                      (-> settings :trello :boards))))

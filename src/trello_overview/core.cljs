@@ -7,33 +7,36 @@
 
 (enable-console-print!)
 
-(defonce app-state (atom {:cards []}))
+(defonce app-state (atom {:cards []
+                          :state "ready"}))
 
 (defn- json-parse [s]
   (js->clj (cljson->clj s) :keywordize-keys true))
 
 (defn cards []
-  [:ul
+  [:ul {:class (:state @app-state)}
    (for [item (:cards @app-state)]
      ^{:key item} [:li item])])
 
 (defn- get-cards [list-name]
   (go
+    (swap! app-state assoc :state "loading")
     (let [body (:body (<! (http/get (str "/cards/" list-name))))]
-      (swap! app-state assoc :cards (:cards (json-parse body))))))
+      (swap! app-state assoc :cards (doall (:cards (json-parse body)))
+                             :state "ready"))))
 
 (def lists ["Backlog" "In Progress" "Pending Deployment"])
 
 (defn navi []
   [:div
    (for [l lists]
-     [:span {:class "navi"
-             :style {:color (if (= (:list @app-state) l)
-                              "red"
-                              "black")}
-             :on-click #(do
-                          (swap! app-state assoc :list l)
-                          (get-cards l))} l])])
+     ^{:key l} [:span {:class "navi"
+                       :style {:color (if (= (:list @app-state) l)
+                                        "red"
+                                        "black")}
+                       :on-click #(do
+                                    (swap! app-state assoc :list l)
+                                    (get-cards l))} l])])
 
 (defn trello-app []
   [:div

@@ -2,3 +2,10 @@ span.navi {
   padding: 5px;
 }
 
+.ready {
+  color: black;
+}
+
+.loading {
+  color: gray;
+}
