@@ -1,4 +1,4 @@
 {:trello {:key "ADD_KEY"
           :secret "ADD_SECRET"
           :token "ADD_READ_ONLY_TOKEN"
-          :boards ["id"]}}
+          :organization "my-organization"}}
