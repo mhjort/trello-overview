@@ -1,5 +1,9 @@
-span.navi {
+span {
   padding: 5px;
+}
+
+.selected {
+  color: red;
 }
 
 .ready {

@@ -8,21 +8,22 @@
 (enable-console-print!)
 
 (defonce app-state (atom {:cards []
+                          :selected-boards #{}
                           :state "ready"}))
 
 (defn- json-parse [s]
-  (js->clj (cljson->clj s) :keywordize-keys true))
+  (:data (js->clj (cljson->clj s) :keywordize-keys true)))
 
 (defn cards []
   [:ul {:class (:state @app-state)}
    (for [item (:cards @app-state)]
-     ^{:key item} [:li item])])
+     ^{:key item} [:li (str "[" (:board item) "]: " (:name item))])])
 
 (defn- get-cards [list-name]
   (go
     (swap! app-state assoc :state "loading")
-    (let [body (:body (<! (http/get (str "/cards/" list-name))))]
-      (swap! app-state assoc :cards (doall (:cards (json-parse body)))
+    (let [body (:body (<! (http/get (str "/cards/list/" list-name "?board_ids=" (clojure.string/join "," (:selected-boards @app-state))))))]
+      (swap! app-state assoc :cards (json-parse body)
                              :state "ready"))))
 
 (def lists ["Backlog" "In Progress" "Pending Deployment"])
@@ -38,14 +39,24 @@
                                     (swap! app-state assoc :list l)
                                     (get-cards l))} l])])
 
+(defn boards []
+  [:div
+   (for [b (:boards @app-state)]
+     ^{:key (:id b)} [:span {:on-click #(println (swap! app-state update :selected-boards conj (:id b)))}
+
+                      (:name b)])])
+
 (defn trello-app []
   [:div
+   (boards)
    (navi)
    (cards)])
 
-(reagent/render-component [trello-app]
-                          (.-body js/document))
-
+(go
+  (let [body (:body (<! (http/get "/boards")))]
+    (swap! app-state assoc :boards (json-parse body))
+    (reagent/render-component [trello-app]
+                              (.-body js/document))))
 
 (defn on-js-reload []
   ;; optionally touch your app-state to force rerendering depending on
