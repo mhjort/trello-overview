@@ -29,20 +29,27 @@
 (def lists ["Backlog" "In Progress" "Pending Deployment"])
 
 (defn navi []
-  [:div
+  [:ul {:class "boards"}
    (for [l lists]
-     ^{:key l} [:span {:class "navi"
-                       :style {:color (if (= (:list @app-state) l)
-                                        "red"
-                                        "black")}
+     ^{:key l} [:li {:class (str "navi" (if (= (:list @app-state) l)
+                                       " selected"
+                                       ""))
                        :on-click #(do
                                     (swap! app-state assoc :list l)
                                     (get-cards l))} l])])
+(defn- toggle-board [x]
+  (if (some #(= (:id x) %) (:selected-boards @app-state))
+    (swap! app-state update :selected-boards disj (:id x))
+    (swap! app-state update :selected-boards conj (:id x))))
 
 (defn boards []
   [:div
+   {:class "boards"}
    (for [b (:boards @app-state)]
-     ^{:key (:id b)} [:span {:on-click #(println (swap! app-state update :selected-boards conj (:id b)))}
+     ^{:key (:id b)} [:span {:on-click #(toggle-board b)
+                             :class (if (some #(= (:id b) %) (:selected-boards @app-state))
+                                      "selected"
+                                      "")}
 
                       (:name b)])])
 
