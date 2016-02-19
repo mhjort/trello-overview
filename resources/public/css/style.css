@@ -2,7 +2,12 @@ span {
   padding: 5px;
 }
 
-.selected {
+div.boards span:hover {
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+span.selected {
   color: red;
 }
 
@@ -12,4 +17,18 @@ span {
 
 .loading {
   color: gray;
+}
+
+ul.boards li {
+  padding-right: 5px;
+  display: inline;
+}
+
+ul.boards li:hover {
+  cursor: pointer;
+  color: black;
+}
+
+ul.boards li.selected {
+  text-decoration: underline;
 }
